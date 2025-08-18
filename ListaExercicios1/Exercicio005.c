@@ -3,24 +3,21 @@
 int main() {
    double x,y,z,total;
    
-   printf("Digite os tamanhos dos lados do triangulo: ");
    scanf("%lf %lf %lf", &x, &y, &z);
 
-   if (x + y > z && x + z > y && y + z> x)   {
-    printf("Eh triangulo!\n");
+   if (x + y > z && x + z > y && y + z> x){
     if(x == y && y == z) {
-      printf("Equilatero\n");
+      printf("EQUILATERO\n");
     }
     if (x == y || y == z || x == z) {
-      printf("Isoceles");
+      printf("ISOSCELES\n");
     }
     if (x != y && y != z) {
-      printf("Escaleno");
+      printf("ESCALENO\n");
     }
    } else {
-      printf("Nao eh triangulo!\n");
+      printf("NAO EH TRIANGULO\n");
    }
    
-
    return 0;
 }

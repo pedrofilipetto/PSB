@@ -5,11 +5,9 @@ int main() {
     int i, j, valor;
     long int fatorial;
 
-    printf("Digite a quantidade de numeros que voce quer calcular o fatorial: ");
     scanf("%d", &n);
 
     for (i = 0; i < n; i++) {
-        printf("Digite um numero inteiro e positivo: ");
         scanf("%d", &valor);
 
         fatorial = 1;
@@ -17,7 +15,7 @@ int main() {
             fatorial *= j;
         }
         
-        printf("Valor lido: %d, Fatorial %ld\n", valor, fatorial);
+        printf("%ld %ld\n", valor, fatorial);
     }
     
     return 0;    

@@ -8,21 +8,17 @@ int main() {
     int x;
     int y;
 
-    printf("Insira um numero: ");
     scanf("%d", &x);
     int hasDivisor = 0;
     if (x > 0) {
-        printf("Divisores de %d: ", x);
         for (y = 2; y < x; y++) {
             if (x % y == 0) {
-                printf("%d ", y);
+                printf("%d", y);
                 hasDivisor = 1;
             }
         }
-        if (!hasDivisor) {
+        if (hasDivisor != 1) {
             printf("*\n");
         }
-    } else {
-        printf("O numero deve ser maior que 0.\n");
     }
 }
