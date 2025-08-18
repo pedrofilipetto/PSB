@@ -6,19 +6,18 @@ divisores.
 
 int main() {
     int x;
-    int y;
 
     scanf("%d", &x);
     int hasDivisor = 0;
     if (x > 0) {
-        for (y = 2; y < x; y++) {
+        for (int y = 2; y < x; y++) {
             if (x % y == 0) {
-                printf("%d", y);
+                printf("%d ", y);
                 hasDivisor = 1;
             }
         }
         if (hasDivisor != 1) {
-            printf("*\n");
+            printf("*");
         }
     }
 }
