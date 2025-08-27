@@ -31,7 +31,7 @@ int main() {
         imc = 0;
     }
 
-    printf("%s; %.4f\n", nome, imc);
+    printf("%s: %.4f\n", nome, imc);
 
     return 0;
 }
