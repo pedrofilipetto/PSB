@@ -5,7 +5,7 @@ responde a quantidade de valores inteiros (que aparecem na sequ ` encia dentro d
 desses valores, calculando e mostrando o somatorio desses valores. Caso o arquivo N ´ AO exista, seu programa ˜
 deve imprimir a mensagem “ARQUIVO INEXISTENTE” (encerrando o programa com codigo de sucesso, ou seja, ´
 0).
- */
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
