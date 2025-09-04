@@ -8,7 +8,6 @@ typedef struct
 void incrementa_dia(dia_t *d);
 void mostra_dia(dia_t d);
 
-// Função principal
 int main()
 {
     dia_t d;

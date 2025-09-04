@@ -1,2 +1,50 @@
-#include <stdio.h>
+/*
+Escreva um programa em C que, inicialmente, leia o nome de um arquivo (com no maximo 17 caracteres uteis).
+A seguir, seu programa devera abrir o arquivo para leitura em modo binario, lendo um numero inteiro, que
+corresponde a quantidade de valores inteiros (que aparecem na sequencia dentro desse mesmo arquivo), e cada
+um desses valores, calculando e mostrando o somatorio desses valores. Caso o arquivo NAO exista, seu programa
+deve imprimir a mensagem "ARQUIVO INEXISTENTE" (encerrando o programa com codigo de sucesso, ou seja,
+0). Todos os valores lidos devem ser valores inteiros de 4 bytes, lidos no modo binario.
+*/
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main() {
+    char nomeArquivo[18];
+    char comando[50];
+    char arquivoTemp[] = "decoded.bin";
+    FILE *arquivo;
+    int quantidade;
+    int valor;
+    long long somatorio = 0;
+    
+    scanf("%17s", nomeArquivo);
+    
+    arquivo = fopen(nomeArquivo, "r");
+    if (arquivo == NULL) {
+        printf("ARQUIVO INEXISTENTE\n");
+        return 0;
+    }
+    fclose(arquivo);
+    
+    sprintf(comando, "base64 -d %s > %s", nomeArquivo, arquivoTemp);
+    system(comando);
+    
+    arquivo = fopen(arquivoTemp, "rb");
+    
+    fread(&quantidade, sizeof(int), 1, arquivo);
+    
+    for (int i = 0; i < quantidade; i++) {
+        fread(&valor, sizeof(int), 1, arquivo);
+        somatorio += valor;
+    }
+    
+    printf("%lld\n", somatorio);
+    
+    fclose(arquivo);
+    remove(arquivoTemp);
+    
+    return 0;
+}
