@@ -1,10 +1,10 @@
-/**
- * Arquivo: Exercicio001 - Lista 4
- * Autor: Francisco Coimbra Rotilli
- * 
- * Descricao: Recebe o nome de um arquivo, le em modo binario. Na primeira linha, a quantidade de valores e na segunda os valores em si. Retorna a soma de todos os valores.
- * 
- * Versao: 04-09-2025
+/*
+Escreva um programa em C que, inicialmente, leia o nome de um arquivo (com no maximo 17 caracteres ´ uteis). ´
+A seguir, seu programa devera abrir o arquivo para ´ leitura em modo texto, lendo um numero inteiro, que cor- ´
+responde a quantidade de valores inteiros (que aparecem na sequ ` encia dentro desse mesmo arquivo), e cada um ˆ
+desses valores, calculando e mostrando o somatorio desses valores. Caso o arquivo N ´ AO exista, seu programa ˜
+deve imprimir a mensagem “ARQUIVO INEXISTENTE” (encerrando o programa com codigo de sucesso, ou seja, ´
+0).
  */
 
 #include <stdio.h>
