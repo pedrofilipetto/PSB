@@ -1,12 +1,3 @@
-/*
-Escreva um programa em C que, inicialmente, leia o nome de um arquivo (com no maximo 17 caracteres ´ uteis). ´
-A seguir, seu programa devera abrir o arquivo para ´ leitura em modo texto, lendo um numero inteiro, que cor- ´
-responde a quantidade de valores inteiros (que aparecem na sequ ` encia dentro desse mesmo arquivo), e cada um ˆ
-desses valores, calculando e mostrando o somatorio desses valores. Caso o arquivo N ´ AO exista, seu programa ˜
-deve imprimir a mensagem “ARQUIVO INEXISTENTE” (encerrando o programa com codigo de sucesso, ou seja, ´
-0).
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
