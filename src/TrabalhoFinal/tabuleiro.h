@@ -11,7 +11,7 @@ typedef enum{
 
 typedef struct {
     bool tem_bomba;
-    int bombas_vizinhas;
+    int bombas_adjacentes;
     EstadoCasa estado;
 } Casa;
 
