@@ -3,127 +3,106 @@
 #include <time.h>
 #include "board.h"
 
-typedef struct { int r, c; } P;
+static int board[ROWS][COLS];
+static int revealed[ROWS][COLS];
+static int flagged[ROWS][COLS];
 
-static const int DR[8] = {-1,-1,-1, 0, 0, 1, 1, 1};
-static const int DC[8] = {-1, 0, 1,-1, 1,-1, 0, 1};
-
-bool board_in_bounds(const Board *b, int r, int c) {
-    return r >= 0 && r < b->rows && c >= 0 && c < b->cols;
+static int in_bounds(int r, int c) {
+    return r >= 0 && r < ROWS && c >= 0 && c < COLS;
 }
 
-bool board_init(Board *b, int rows, int cols, int mines) {
-    b->rows = rows; b->cols = cols; b->mines = mines;
-    b->grid = (Cell**) malloc(rows * sizeof(Cell*));
-    if (!b->grid) return false;
-    for (int i = 0; i < rows; ++i) {
-        b->grid[i] = (Cell*) calloc(cols, sizeof(Cell));
-        if (!b->grid[i]) {
-            for (int k = 0; k < i; ++k) free(b->grid[k]);
-            free(b->grid); b->grid = NULL;
-            return false;
+void clear_board(void) {
+    for (int r = 0; r < ROWS; r++)
+        for (int c = 0; c < COLS; c++) {
+            board[r][c] = 0;
+            revealed[r][c] = 0;
+            flagged[r][c] = 0;
         }
-    }
-    return true;
 }
 
-void board_free(Board *b) {
-    if (!b || !b->grid) return;
-    for (int i = 0; i < b->rows; ++i) free(b->grid[i]);
-    free(b->grid);
-    b->grid = NULL;
-}
-
-void board_place_mines(Board *b, unsigned int seed) {
-    srand(seed);
+void place_mines(void) {
     int placed = 0;
-    while (placed < b->mines) {
-        int r = rand() % b->rows;
-        int c = rand() % b->cols;
-        if (!b->grid[r][c].has_mine) {
-            b->grid[r][c].has_mine = true;
+    srand((unsigned)time(NULL));
+    while (placed < MINES) {
+        int r = rand() % ROWS;
+        int c = rand() % COLS;
+        if (board[r][c] != -1) {
+            board[r][c] = -1;
             placed++;
         }
     }
 }
 
-void board_count_adjacents(Board *b) {
-    for (int r = 0; r < b->rows; ++r) {
-        for (int c = 0; c < b->cols; ++c) {
-            if (b->grid[r][c].has_mine) {
-                b->grid[r][c].adj = -1;
-                continue;
+void count_adjacents(void) {
+    int dr[8] = {-1,-1,-1, 0, 0, 1, 1, 1};
+    int dc[8] = {-1, 0, 1,-1, 1,-1, 0, 1};
+
+    for (int r = 0; r < ROWS; r++) {
+        for (int c = 0; c < COLS; c++) {
+            if (board[r][c] == -1) continue;
+            int soma = 0;
+            for (int k = 0; k < 8; k++) {
+                int nr = r + dr[k];
+                int nc = c + dc[k];
+                if (in_bounds(nr, nc) && board[nr][nc] == -1)
+                    soma++;
             }
-            int cnt = 0;
-            for (int k = 0; k < 8; ++k) {
-                int nr = r + DR[k], nc = c + DC[k];
-                if (board_in_bounds(b, nr, nc) && b->grid[nr][nc].has_mine) cnt++;
-            }
-            b->grid[r][c].adj = cnt;
+            board[r][c] = soma;
         }
     }
 }
 
-bool board_toggle_flag(Board *b, int r, int c) {
-    if (!board_in_bounds(b, r, c)) return false;
-    Cell *cell = &b->grid[r][c];
-    if (cell->revealed) return false;
-    cell->flagged = !cell->flagged;
-    return true;
-}
+void print_board(int reveal_all) {
+    printf("    ");
+    for (int c = 0; c < COLS; c++) printf("%2d ", c);
+    printf("\n");
 
-/**
- * Revela uma célula. Retorna true se EXPLODIU.
- * Se adj==0, faz flood BFS revelando vizinhos.
- * Em newly_revealed, devolve quantas novas células foram abertas.
- */
-bool board_reveal(Board *b, int r, int c, int *newly_revealed) {
-    if (newly_revealed) *newly_revealed = 0;
-    if (!board_in_bounds(b, r, c)) return false;
-
-    Cell *start = &b->grid[r][c];
-    if (start->flagged || start->revealed) return false;
-
-    if (start->has_mine) {
-        start->revealed = true; // mostra a bomba estourada
-        if (newly_revealed) (*newly_revealed)++;
-        return true; // explodiu
-    }
-
-    // BFS para flood de zeros
-    int cap = b->rows * b->cols;
-    P *q = (P*) malloc(sizeof(P) * cap);
-    int qh = 0, qt = 0;
-
-    q[qt++] = (P){r, c};
-    while (qh < qt) {
-        P cur = q[qh++];
-        Cell *cell = &b->grid[cur.r][cur.c];
-        if (cell->revealed || cell->flagged) continue;
-        cell->revealed = true;
-        if (newly_revealed) (*newly_revealed)++;
-
-        if (cell->adj == 0) {
-            for (int k = 0; k < 8; ++k) {
-                int nr = cur.r + DR[k], nc = cur.c + DC[k];
-                if (!board_in_bounds(b, nr, nc)) continue;
-                Cell *nb = &b->grid[nr][nc];
-                if (!nb->revealed && !nb->flagged && !nb->has_mine) {
-                    q[qt++] = (P){nr, nc};
-                }
+    for (int r = 0; r < ROWS; r++) {
+        printf("%2d |", r);
+        for (int c = 0; c < COLS; c++) {
+            char ch = 'X';
+            if (reveal_all || revealed[r][c]) {
+                if (board[r][c] == -1) ch = '*';
+                else if (board[r][c] == 0) ch = ' ';
+                else ch = (char)('0' + board[r][c]);
+            } else if (flagged[r][c]) {
+                ch = '+';
             }
+            printf(" %c ", ch);
         }
+        printf("|\n");
     }
-
-    free(q);
-    return false; // não explodiu
 }
 
-int board_hidden_nonmine_left(const Board *b) {
-    int total = b->rows * b->cols - b->mines;
-    int revealed = 0;
-    for (int r = 0; r < b->rows; ++r)
-        for (int c = 0; c < b->cols; ++c)
-            if (b->grid[r][c].revealed && !b->grid[r][c].has_mine) revealed++;
-    return total - revealed;
+/* Flood recursivo */
+int reveal_cell(int r, int c, int *explodiu) {
+    if (!in_bounds(r, c)) return 0;
+    if (revealed[r][c] || flagged[r][c]) return 0;
+
+    revealed[r][c] = 1;
+    if (board[r][c] == -1) { *explodiu = 1; return 1; }
+
+    int new = 1;
+    if (board[r][c] == 0) {
+        int dr[8] = {-1,-1,-1, 0, 0, 1, 1, 1};
+        int dc[8] = {-1, 0, 1,-1, 1,-1, 0, 1};
+        for (int k = 0; k < 8; k++)
+            new += reveal_cell(r+dr[k], c+dc[k], explodiu);
+    }
+    return new;
+}
+
+void toggle_flag(int r, int c) {
+    if (in_bounds(r, c) && !revealed[r][c])
+        flagged[r][c] = !flagged[r][c];
+}
+
+int hidden_without_bomb(void) {
+    int total_without_bomb = ROWS * COLS - MINES;
+    int revealed_count = 0;
+    for (int r = 0; r < ROWS; r++)
+        for (int c = 0; c < COLS; c++)
+            if (revealed[r][c] && board[r][c] != -1)
+                revealed_count++;
+    return total_without_bomb - revealed_count;
 }

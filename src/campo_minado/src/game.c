@@ -1,92 +1,56 @@
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
-#include "game.h"
-#include "IO.h"
+#include "board.h"
 #include "score.h"
 
-void game_start(Game *g, const char *player) {
-    strncpy(g->player, player, sizeof(g->player) - 1);
-    g->player[sizeof(g->player) - 1] = '\0';
-
-    if (!board_init(&g->board, BOARD_ROWS, BOARD_COLS, BOARD_MINES)) {
-        fprintf(stderr, "Erro ao inicializar tabuleiro.\n");
-        g->running = false;
-        return;
-    }
-
-    unsigned int seed = (unsigned int)time(NULL);
-    board_place_mines(&g->board, seed);
-    board_count_adjacents(&g->board);
-
-    g->revealed_count = 0;
-    g->running = true;
+static double calculate_score(int revealed) {
+    int total = ROWS * COLS - MINES;
+    return 100.0 * revealed / total;
 }
 
-double game_score(const Game *g) {
-    int total = g->board.rows * g->board.cols - g->board.mines;
-    if (total == 0) return 0.0;
-    return 100.0 * (double)g->revealed_count / (double)total;
-}
+void play_minesweeper(void) {
+    char name[64];
+    printf("==== CAMPO MINADO ====\n");
+    printf("Digite seu nome: ");
+    fgets(name, sizeof(name), stdin);
+    name[strcspn(name, "\n")] = '\0';
 
-void game_loop(Game *g) {
-    char line[64];
-    char op;
+    clean_board();
+    place_bombs();
+    count_adjacent();
+
+    int exploded = 0, revealed = 0;
+    char command;
     int r, c;
 
-    printf("Bem-vindo(a), %s!\n", g->player);
-    printf("Tabuleiro %dx%d com %d bombas.\n", BOARD_ROWS, BOARD_COLS, BOARD_MINES);
-    printf("Comandos: r i j (revelar), f i j (bandeira), q (sair)\n\n");
+    while (!exploded) {
+        print_board(0);
+        printf("Comando (r i j / f i j / q): ");
+        if (scanf(" %c", &command) != 1) break;
+        if (command == 'q') break;
 
-    bool exploded = false;
-
-    while (g->running) {
-        ui_print_board(&g->board, false);
-        io_prompt();
-
-        if (!fgets(line, sizeof(line), stdin)) break;
-        if (!io_parse_command(line, &op, &r, &c)) {
-            printf("Comando inválido!\n");
-            continue;
-        }
-
-        if (op == 'q') {
-            printf("Você desistiu!\n");
-            break;
-        } else if (op == 'f') {
-            board_toggle_flag(&g->board, r, c);
-        } else if (op == 'r') {
-            int newly = 0;
-            exploded = board_reveal(&g->board, r, c, &newly);
-            g->revealed_count += newly;
-
+        if (command == 'r' && scanf("%d %d", &r, &c) == 2) {
+            int novos = reveal_cell(r, c, &exploded);
+            revealed += novos;
             if (exploded) {
-                printf("\n BOOM! Você pisou em uma bomba!\n");
-                io_print_board(&g->board, true);
-                printf("Fim de jogo.\n");
-                g->running = false;
+                printf("\n Bomba! Fim de jogo.\n");
+                print_board(1);
                 break;
             }
-
-            if (board_hidden_nonmine_left(&g->board) == 0) {
+            if (hidden_without_bomb() == 0) {
                 printf("\n Parabéns, você venceu!\n");
-                io_print_board(&g->board, true);
-                double score = game_score(g);
+                print_board(1);
+                double score = calculate_score(revealed);
                 printf("Seu escore: %.2f\n", score);
 
-                // Atualiza ranking
-                ScoreTable t;
-                score_load(SCORE_FILE, &t);
-                score_insert(&t, g->player, score);
-                score_save(SCORE_FILE, &t);
-                printf("\nRanking atualizado:\n");
-                score_print(&t);
-
-                g->running = false;
+                load_scores();
+                insert_score(name, score);
+                save_scores();
+                show_scores();
                 break;
             }
+        } else if (command == 'f' && scanf("%d %d", &r, &c) == 2) {
+            toggle_flag(r, c);
         }
     }
-
-    board_free(&g->board);
 }
