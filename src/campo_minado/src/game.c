@@ -30,8 +30,8 @@ void play_minesweeper(void) {
         if (command == 'q') break;
 
         if (command == 'r' && scanf("%d %d", &r, &c) == 2) {
-            int novos = reveal_cell(r, c, &exploded);
-            revealed += novos;
+            int new = reveal_cell(r, c, &exploded);
+            revealed += new;
             if (exploded) {
                 printf("\n Bomba! Fim de jogo.\n");
                 print_board(1);
