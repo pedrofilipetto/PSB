@@ -15,9 +15,9 @@ void play_minesweeper(void) {
     fgets(name, sizeof(name), stdin);
     name[strcspn(name, "\n")] = '\0';
 
-    clean_board();
-    place_bombs();
-    count_adjacent();
+    clear_board();
+    place_mines();
+    count_adjacents();
 
     int exploded = 0, revealed = 0;
     char command;

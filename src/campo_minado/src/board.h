@@ -9,7 +9,7 @@ void clear_board(void);
 void place_mines(void);
 void count_adjacents(void);
 void print_board(int reveal_all);
-int  reveal_cell(int r, int c, int *explodiu);
+int  reveal_cell(int r, int c, int *exploded);
 void toggle_flag(int r, int c);
 int  hidden_without_bomb(void);
 

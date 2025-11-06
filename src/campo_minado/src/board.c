@@ -75,19 +75,19 @@ void print_board(int reveal_all) {
 }
 
 /* Flood recursivo */
-int reveal_cell(int r, int c, int *explodiu) {
+int reveal_cell(int r, int c, int *exploded) {
     if (!in_bounds(r, c)) return 0;
     if (revealed[r][c] || flagged[r][c]) return 0;
 
     revealed[r][c] = 1;
-    if (board[r][c] == -1) { *explodiu = 1; return 1; }
+    if (board[r][c] == -1) { *exploded = 1; return 1; }
 
     int new = 1;
     if (board[r][c] == 0) {
         int dr[8] = {-1,-1,-1, 0, 0, 1, 1, 1};
         int dc[8] = {-1, 0, 1,-1, 1,-1, 0, 1};
         for (int k = 0; k < 8; k++)
-            new += reveal_cell(r+dr[k], c+dc[k], explodiu);
+            new += reveal_cell(r+dr[k], c+dc[k], exploded);
     }
     return new;
 }
